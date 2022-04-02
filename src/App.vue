@@ -1,114 +1,26 @@
 <template>
   <div class="container mx-auto flex flex-col items-center bg-gray-100 p-4">
-    <!--<div
-				class="fixed w-100 h-100 opacity-80 bg-purple-800 inset-0 z-50 flex items-center justify-center"
-		>
-				<svg
-						class="animate-spin -ml-1 mr-3 h-12 w-12 text-white"
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-				>
-						<circle
-								class="opacity-25"
-								cx="12"
-								cy="12"
-								r="10"
-								stroke="currentColor"
-								stroke-width="4"
-						></circle>
-						<path
-								class="opacity-75"
-								fill="currentColor"
-								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-						></path>
-				</svg>
-		</div>-->
     <div class="container">
-      <section>
-        <div class="flex">
-          <div class="max-w-xs">
-            <label for="wallet" class="block text-sm font-medium text-gray-700"
-              >Тикер</label
-            >
-            <div class="mt-1 relative rounded-md shadow-md">
-              <input
-                v-model="ticker"
-                @keydown.enter="add"
-                type="text"
-                name="wallet"
-                id="wallet"
-                class="block w-full pr-10 border-gray-300 text-gray-900 focus:outline-none focus:ring-gray-500 focus:border-gray-500 sm:text-sm rounded-md"
-                placeholder="Например DOGE"
-              />
-            </div>
-            <div
-              class="flex bg-white shadow-md p-1 rounded-md shadow-md flex-wrap"
-            >
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                BTC
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                DOGE
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                BCH
-              </span>
-              <span
-                class="inline-flex items-center px-2 m-1 rounded-md text-xs font-medium bg-gray-300 text-gray-800 cursor-pointer"
-              >
-                CHD
-              </span>
-            </div>
-            <div class="text-sm text-red-600">Такой тикер уже добавлен</div>
-          </div>
-        </div>
-        <button
-          @click="add"
-          type="button"
-          class="my-4 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-        >
-          <!-- Heroicon name: solid/mail -->
-          <svg
-            class="-ml-0.5 mr-2 h-6 w-6"
-            xmlns="http://www.w3.org/2000/svg"
-            width="30"
-            height="30"
-            viewBox="0 0 24 24"
-            fill="#ffffff"
-          >
-            <path
-              d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"
-            ></path>
-          </svg>
-          Добавить
-        </button>
-      </section>
-
-      <templete v-if="tickers.length">
+      <div class="w-full my-4"></div>
+      <add-ticker @add-ticker="add" :disabled="tooManyTickersAdded" />
+      <template v-if="tickers.length">
         <hr class="w-full border-t border-gray-600 my-4" />
         <div>
           <button
+            class="my-4 mx-2 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             v-if="page > 1"
             @click="page = page - 1"
-            class="my-4 mx-2 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            prev
+            Назад
           </button>
           <button
-            v-if="hasNextPage"
-            @click="page = page + 1"
             class="my-4 mx-2 inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-full text-white bg-gray-600 hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            @click="page = page + 1"
+            v-if="hasNextPage"
           >
-            next
+            Вперед
           </button>
-          <div>Filter: <input v-model="filter" /></div>
+          <div>Фильтр: <input v-model="filter" /></div>
         </div>
         <hr class="w-full border-t border-gray-600 my-4" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
@@ -116,7 +28,9 @@
             v-for="t in paginatedTickers"
             :key="t.name"
             @click="select(t)"
-            :class="{ 'border-4': selectedTicker === t }"
+            :class="{
+              'border-4': selectedTicker === t
+            }"
             class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer"
           >
             <div class="px-4 py-5 sm:p-6 text-center">
@@ -143,14 +57,13 @@
                   fill-rule="evenodd"
                   d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
                   clip-rule="evenodd"
-                ></path>
-              </svg>
-              Удалить
+                ></path></svg
+              >Удалить
             </button>
           </div>
         </dl>
         <hr class="w-full border-t border-gray-600 my-4" />
-      </templete>
+      </template>
       <section v-if="selectedTicker" class="relative">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
           {{ selectedTicker.name }} - USD
@@ -200,19 +113,26 @@
 
 <script>
 import { subscribeToTicker, unsubscribeFromTicker } from "./api";
+import AddTicker from "./components/AddTicker.vue";
 
 export default {
   name: "App",
 
+  components: {
+    AddTicker
+  },
+
   data() {
     return {
-      ticker: "",
+      filter: "",
+
       tickers: [],
       selectedTicker: null,
+
       graph: [],
       maxGraphElements: 1,
-      page: 1,
-      filter: ""
+
+      page: 1
     };
   },
 
@@ -232,7 +152,7 @@ export default {
     // if (windowData.filter) {
     //   this.filter = windowData.filter;
     // }
-    //
+
     // if (windowData.page) {
     //   this.page = windowData.page;
     // }
@@ -256,10 +176,14 @@ export default {
   },
 
   beforeUnmount() {
-    window.addEventListener("resize", this.calculateMaxGraphElements);
+    window.removeEventListener("resize", this.calculateMaxGraphElements);
   },
 
   computed: {
+    tooManyTickersAdded() {
+      return this.tickers.length > 4;
+    },
+
     startIndex() {
       return (this.page - 1) * 6;
     },
@@ -307,8 +231,9 @@ export default {
         return;
       }
 
-      this.maxGraphElements = this.refs.graph.clientWidth / 38;
+      this.maxGraphElements = this.$refs.graph.clientWidth / 38;
     },
+
     updateTicker(tickerName, price) {
       this.tickers
         .filter((t) => t.name === tickerName)
@@ -324,20 +249,19 @@ export default {
     },
 
     formatPrice(price) {
-      if (price === "_") {
+      if (price === "-") {
         return price;
       }
       return price > 1 ? price.toFixed(2) : price.toPrecision(2);
     },
 
-    add() {
+    add(ticker) {
       const currentTicker = {
-        name: this.ticker,
+        name: ticker,
         price: "-"
       };
 
       this.tickers = [...this.tickers, currentTicker];
-      this.ticker = "";
       this.filter = "";
       subscribeToTicker(currentTicker.name, (newPrice) =>
         this.updateTicker(currentTicker.name, newPrice)
@@ -350,7 +274,6 @@ export default {
 
     handleDelete(tickerToRemove) {
       this.tickers = this.tickers.filter((t) => t !== tickerToRemove);
-
       if (this.selectedTicker === tickerToRemove) {
         this.selectedTicker = null;
       }
@@ -361,16 +284,18 @@ export default {
   watch: {
     selectedTicker() {
       this.graph = [];
+
       this.$nextTick().then(this.calculateMaxGraphElements);
     },
 
-    tickers(oldValue, newValue) {
-      console.log(oldValue === newValue);
+    tickers(newValue, oldValue) {
+      // Почему не сработал watch при добавлении?
+      console.log(newValue === oldValue);
       localStorage.setItem("cryptonomicon-list", JSON.stringify(this.tickers));
     },
 
     paginatedTickers() {
-      if (this.length === 0 && this.page > 1) {
+      if (this.paginatedTickers.length === 0 && this.page > 1) {
         this.page -= 1;
       }
     },
@@ -378,14 +303,13 @@ export default {
     filter() {
       this.page = 1;
     },
+
     pageStateOptions(value) {
-      {
-        window.history.pushState(
-          null,
-          document.title,
-          `${window.location.pathname}?filter=${value.filter}&page=${value.page}`
-        );
-      }
+      window.history.pushState(
+        null,
+        document.title,
+        `${window.location.pathname}?filter=${value.filter}&page=${value.page}`
+      );
     }
   }
 };
