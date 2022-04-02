@@ -216,6 +216,41 @@ export default {
     };
   },
 
+  created() {
+    const windowData = Object.fromEntries(
+      new URL(window.location).searchParams.entries()
+    );
+
+    const VALID_KEYS = ["filter", "page"];
+
+    VALID_KEYS.forEach((key) => {
+      if (windowData[key]) {
+        this[key] = windowData[key];
+      }
+    });
+
+    // if (windowData.filter) {
+    //   this.filter = windowData.filter;
+    // }
+    //
+    // if (windowData.page) {
+    //   this.page = windowData.page;
+    // }
+
+    const tickersData = localStorage.getItem("cryptonomicon-list");
+
+    if (tickersData) {
+      this.tickers = JSON.parse(tickersData);
+      this.tickers.forEach((ticker) => {
+        subscribeToTicker(ticker.name, (newPrice) =>
+          this.updateTicker(ticker.name, newPrice)
+        );
+      });
+    }
+
+    setInterval(this.updateTickers, 5000);
+  },
+
   mounted() {
     window.addEventListener("resize", this.calculateMaxGraphElements);
   },
@@ -266,40 +301,6 @@ export default {
     }
   },
 
-  created() {
-    const windowData = Object.fromEntries(
-      new URL(window.location).searchParams.entries()
-    );
-
-    const VALID_KEYS = ["filter", "page"];
-
-    VALID_KEYS.forEach((key) => {
-      if (windowData[key]) {
-        this[key] = windowData[key];
-      }
-    });
-
-    // if (windowData.filter) {
-    //   this.filter = windowData.filter;
-    // }
-    //
-    // if (windowData.page) {
-    //   this.page = windowData.page;
-    // }
-
-    const tickersData = localStorage.getItem("cryptonomicon-list");
-
-    if (tickersData) {
-      this.tickers = JSON.parse(tickersData);
-      this.tickers.forEach((ticker) => {
-        subscribeToTicker(ticker.name, (newPrice) =>
-          this.updateTicker(ticker.name, newPrice)
-        );
-      });
-    }
-
-    setInterval(this.updateTickers, 5000);
-  },
   methods: {
     calculateMaxGraphElements() {
       if (!this.$refs.graph) {
